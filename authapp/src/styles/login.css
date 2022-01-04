@@ -1,0 +1,125 @@
+
+/* Utility classes */
+
+.container{
+    max-width: 80vw;
+    margin: auto;
+}
+
+.btn{
+    display: inline-block;
+    font-size: 18px;
+    color: #fff;
+    background: #666666;
+    padding: 13px 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .btn:hover{
+    background: #515151;
+    color: #f7c08a;
+  }
+
+/* Utility classes --end */
+
+
+#login-page::before{
+    content: "";
+    background:#f4f4f4;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    z-index: -1;
+}
+
+.flex-container{
+    display: flex;
+    /* flex-direction: row; */
+    /* text-align: center; */
+    /* justify-content: center; */
+    align-items: center;
+    height: calc(100vh - 67px);
+}
+
+.flex-container .token-info{
+    /* flex-basis: 100%; */
+    /* flex: 1 1 0px; */
+    flex: 1;
+    text-align: left;
+    margin: auto;
+}
+
+.flex-container .token-info .token-form{
+    width: 75%;
+    margin: 0 auto;
+}
+
+.flex-container .form-container .token-form h2{
+    font-size: 1.75rem;
+    margin: 0 0 1.5rem 0;
+    border-bottom: 2px solid #000;
+}
+
+.token-form .form-group{
+    margin: 1rem auto;
+  }
+  
+.token-form .form-group label{
+    font-size: 1.15rem;
+    display: block;
+    margin: 0 auto 0.7rem auto;
+}
+  
+.token-form .form-group input{
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px #ddd solid;
+
+}
+
+.flex-container .form-container {
+    /* flex-basis: 100%; */
+    /* flex: 1 1 0px; */
+    flex: 1;
+    text-align:left;
+}
+
+.flex-container .form-container .login-form{
+    width: 75%;
+    margin: 0 auto;
+}
+
+.flex-container .form-container .login-form h2{
+    font-size: 1.75rem;
+    margin: 0 0 1.5rem 0;
+    border-bottom: 2px solid #000;
+}
+
+.login-form .form-group{
+    margin: 1rem auto;
+  }
+  
+.login-form .form-group label{
+    font-size: 1.15rem;
+    display: block;
+    margin: 0 auto 0.7rem auto;
+}
+  
+.login-form .form-group input{
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px #ddd solid;
+
+}
+
+.login-form .form-group input:focus{
+  outline: none;
+  border: 1px #f7c08a solid;
+}
+
+.login-form button {
+    margin-top: 1rem;
+}

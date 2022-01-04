@@ -1,0 +1,26 @@
+#ignore files in authapi directory:
+
+/authapi/node_modules
+
+#ignore files in authapp directory:
+
+/authapp/node_modules
+/authapp/.pnp
+/authapp/.pnp.js
+
+# testing
+/authapp/coverage
+
+# production
+/authapp/build
+
+# misc
+/authapp/.DS_Store
+/authapp/.env.local
+/authapp/.env.development.local
+/authapp/.env.test.local
+/authapp/.env.production.local
+
+/authapp/npm-debug.log*
+/authapp/yarn-debug.log*
+/authapp/yarn-error.log*

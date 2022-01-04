@@ -1,0 +1,41 @@
+.container{
+    max-width: 80vw;
+    margin: auto;
+}
+
+#showcase::before{
+    content: "";
+    background: url('../../public/background-6.jpg') center/cover;
+    position: absolute;
+    top: 0;
+    right:0;
+    bottom: 0;
+    left:0;
+    z-index: -1;
+    opacity:0.95;
+}
+
+#showcase {
+    height: calc(100vh - 67px);
+}
+
+#showcase .showcase-content {
+    /* margin: 1rem 0; */
+    font-size: 1.05rem;
+    text-align: center;
+    color: #fff;
+    padding-top: 170px;
+}
+
+.showcase-content>h1 {
+    margin: 1.1rem 0 1.1rem 0;
+    font-size: 3rem;
+}
+
+.showcase-content>p {
+    /* margin-bottom: 1rem; */
+    font-size: 2rem;
+    font-weight: 600;
+    font-style: oblique;
+    /* color: #6ebcf9; */
+}
