@@ -2,21 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
-
+const bcrypt = require('bcrypt');
 
 const Schema = mongoose.Schema;
 
 //Define a user schema
 const userSchema = new Schema({
-    firstName: String,
-    lastName: String,
-    email: String,
-    phone: String,
-    address: {
-        city: String,
-        street: String,
-        zipcode: String
-    }
+    username: String,
+    password: String
 });
 
 
@@ -48,8 +41,10 @@ app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 
-const verifyToken = (req,res,next) => {
+const verifyToken = async (req,res,next) => {
     const token = req.get('Authorization').split(' ')[1];
+    // console.log(token);
+    // console.log(req.body.username, req.body.password);
     let decodedToken;
     try{
         decodedToken = jwt.verify(token,'somesupersecret');
@@ -63,7 +58,8 @@ const verifyToken = (req,res,next) => {
         error.statusCode = 401;
         throw error;
     }
-    req.username = decodedToken.username;
+    // req.username = decodedToken.username;
+    next();
 }
 
 
@@ -85,32 +81,47 @@ app.post('/login/auth', (req,res) => {
     });
 });
 
+
 // Add user to database
-// app.post('/api/adduser', async (req,res) => {
-//     const {firstName,lastName,email,phone,city,street,zipcode} =  req.body;
-//     // const doc = req.body;
-//     // console.log(doc);
-//     // console.log(req.body);
-//     const address = {
-//         city,
-//         street,
-//         zipcode
-//     };
-    
-//     const myUser = new user({
-//         firstName,
-//         lastName,
-//         email,
-//         phone,
-//         address
+// app.post('/api/adduser', (req,res) => {
+//     const {username,password} =  req.body;
+//     bcrypt.hash(password, 12)
+//     .then(hashedPassword => {
+//         const myUser = new user({
+//             username,
+//             password: hashedPassword
+//         });
+
+//         return myUser.save();
+//     })
+//     .then(result => {
+//             res.status(200).json(result);
+//      })
+//     .catch(error => {
+//         console.log(error)
 //     });
-    
-//     let result = await myUser.save();
-//     console.log(result);
-    
-//     res.send('success');
+
 // });
 
+
+app.post('/api/adduser', verifyToken, async (req,res) => {
+    const {username,password} = req.body;
+    // console.log('Username: ' + username + 'Password: ' + password);
+    try{
+        const hashedPassword = await bcrypt.hash(password,12);
+        const myUser = new user({
+            username,
+            password: hashedPassword
+        });
+    
+        const result = await myUser.save();
+    
+        res.status(200).json(result);
+    }
+    catch(error){
+        console.log(error);
+    }
+});
 
 //GET users from database
 // app.get('/users',async (req,res) => {
