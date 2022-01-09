@@ -13,7 +13,7 @@ const LoginPage = () => {
 
     const submitLoginCredentials = async (e) => {
         e.preventDefault();
-        const submitResult = await fetch('http://localhost:4000/login/auth', {
+        const submitResult = await fetch('/login/auth', {
             method: 'POST',
             body: JSON.stringify({
                 username,

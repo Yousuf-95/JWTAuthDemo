@@ -3,6 +3,12 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+// const csrf = require('csurf');
+
+// const csrfProtection = csrf({
+//     cookie: true
+// });
 
 const Schema = mongoose.Schema;
 
@@ -39,10 +45,16 @@ app.use(function (req, res, next) {
 
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 
 const verifyToken = async (req,res,next) => {
-    const token = req.get('Authorization').split(' ')[1];
+    // const token = req.get('Authorization').split(' ')[1];
+    
+    //Getting token from the cookie
+    const token = req.cookies.token;
+    
+    
     // console.log(token);
     // console.log(req.body.username, req.body.password);
     let decodedToken;
@@ -63,48 +75,61 @@ const verifyToken = async (req,res,next) => {
 }
 
 
+
 app.post('/login/auth', (req,res) => {
     console.log(req.body);
     const token = jwt.sign(
         {
-        username: req.body.username,
+            username: req.body.username,
         },
         'somesupersecret',
         {expiresIn: '1h'}
-    );
-    const decodedToken = jwt.decode(token);
-    const expiresAt = decodedToken.exp;
-    // console.log(token);
-    res.json({
-        token,
-        expiresAt
+        );
+        
+        const decodedToken = jwt.decode(token);
+        const expiresAt = decodedToken.exp;
+        // console.log(token);
+        
+        //setting cookie
+        res.cookie('token',token, {
+            httpOnly: true
+        });
+
+        res.json({
+            token,
+            expiresAt
+        });
     });
-});
-
-
-// Add user to database
-// app.post('/api/adduser', (req,res) => {
-//     const {username,password} =  req.body;
-//     bcrypt.hash(password, 12)
-//     .then(hashedPassword => {
-//         const myUser = new user({
-//             username,
-//             password: hashedPassword
-//         });
-
-//         return myUser.save();
+    
+    
+    // Add user to database
+    // app.post('/api/adduser', (req,res) => {
+        //     const {username,password} =  req.body;
+        //     bcrypt.hash(password, 12)
+        //     .then(hashedPassword => {
+            //         const myUser = new user({
+                //             username,
+                //             password: hashedPassword
+                //         });
+                
+                //         return myUser.save();
 //     })
 //     .then(result => {
-//             res.status(200).json(result);
-//      })
-//     .catch(error => {
-//         console.log(error)
-//     });
-
-// });
-
-
-app.post('/api/adduser', verifyToken, async (req,res) => {
+    //             res.status(200).json(result);
+    //      })
+    //     .catch(error => {
+        //         console.log(error)
+        //     });
+        
+        // });
+        
+        
+    // app.use(csrfProtection);
+    // app.get('/api/csrf-protection',(req,res) => {
+    //     res.json({ csrfToken: req.csrfToken() });
+    // });
+        
+    app.post('/api/adduser', verifyToken, async (req,res) => {
     const {username,password} = req.body;
     // console.log('Username: ' + username + 'Password: ' + password);
     try{
@@ -113,7 +138,7 @@ app.post('/api/adduser', verifyToken, async (req,res) => {
             username,
             password: hashedPassword
         });
-    
+        
         const result = await myUser.save();
     
         res.status(200).json(result);

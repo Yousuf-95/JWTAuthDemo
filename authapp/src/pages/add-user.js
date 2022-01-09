@@ -9,15 +9,15 @@ const AddUser = () => {
     const addUserCredentials = async (e) => {
         e.preventDefault();
         try{
-            console.log(authContext.authState.token);
-            const submitResult = await fetch('http://localhost:4000/api/adduser', {
+            // console.log(authContext.authState.token);
+            const submitResult = await fetch('/api/adduser', {
             method: 'POST',
             body: JSON.stringify({
                 username,
                 password
             }),
             headers: {
-                "Authorization": 'Bearer ' + authContext.authState.token,
+                // "Authorization": 'Bearer ' + authContext.authState.token,
                 "content-type": "application/json"
             }
         });

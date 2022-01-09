@@ -5,16 +5,16 @@ const AuthContext = createContext();
 const {Provider} = AuthContext;
 
 const AuthProvider = ({children}) => {
-    const token = localStorage.getItem('token');
+    // const token = localStorage.getItem('token');
     const expiresAt = localStorage.getItem('expiresAt');
 
     let [authState, setAuthState] = useState({
-        token,
+        token: null,
         expiresAt
     });
 
     const setAuthInfo = ({token,expiresAt}) => {
-        localStorage.setItem('token',token);
+        // localStorage.setItem('token',token);
         localStorage.setItem('expiresAt',expiresAt);
         
         setAuthState({
