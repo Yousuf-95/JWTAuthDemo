@@ -25,7 +25,7 @@ const LoginPage = () => {
         });
 
         const data = await submitResult.json();
-        console.log(data);
+        console.table(data);
         authContext.setAuthState(data);
         setRedirectOnLogin(true);
     }

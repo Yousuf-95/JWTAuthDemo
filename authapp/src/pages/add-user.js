@@ -9,7 +9,14 @@ const AddUser = () => {
     const addUserCredentials = async (e) => {
         e.preventDefault();
         try{
+            //Getting data JWT Token from authContext
             // console.log(authContext.authState.token);
+
+            //Getting csrf token
+            const csrfToken = await fetch('/api/csrf-protection');
+            const token = await csrfToken.json();
+
+            //Submitting post request along with fetched csrf token
             const submitResult = await fetch('/api/adduser', {
             method: 'POST',
             body: JSON.stringify({
@@ -18,6 +25,7 @@ const AddUser = () => {
             }),
             headers: {
                 // "Authorization": 'Bearer ' + authContext.authState.token,
+                "X-CSRF-TOKEN": token.csrfToken,
                 "content-type": "application/json"
             }
         });
