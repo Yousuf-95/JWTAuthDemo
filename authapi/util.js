@@ -1,6 +1,20 @@
 const randToken = require('rand-token');
 const jwt = require('jsonwebtoken');
 
+
+const createToken = (username) => {
+    if(!username){
+        throw new Error('No username specified');
+    }
+
+    return jwt.sign({
+        username
+    },
+    'somesupersecret',
+    {expiresIn: '10s'}
+    );
+}
+
 const verifyToken = async (req,res,next) => {
     // const token = req.get('Authorization').split(' ')[1];
     
@@ -15,14 +29,16 @@ const verifyToken = async (req,res,next) => {
         decodedToken = jwt.verify(token,'somesupersecret');
     }
     catch (err) {
-        err.statusCode = 500;
-        throw err;
+        // err.statusCode = 500;
+        if(!decodedToken){
+            // const error = new Error('Not Authenticated');
+            // error.statusCode = 401;
+            // throw error;
+            return res.status(401).json({error: "JWT Expired"});
+        }
+        return next(err);
     }
-    if(!decodedToken){
-        const error = new Error('Not Authenticated');
-        error.statusCode = 401;
-        throw error;
-    }
+    
     // req.username = decodedToken.username;
     next();
 }
@@ -31,4 +47,4 @@ const getRefreshToken = () => {
     return randToken.uid(64);
 };
 
-module.exports = {verifyToken, getRefreshToken};
+module.exports = {createToken,verifyToken, getRefreshToken};

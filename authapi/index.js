@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
 const csrf = require('csurf');
 // const randToken = require('rand-token');
-const {verifyToken, getRefreshToken} = require('./util');
+const { createToken, verifyToken, getRefreshToken } = require('./util');
 const User = require('./models/user');
 const Token = require('./models/token');
 
@@ -17,7 +17,7 @@ const csrfProtection = csrf({
 const app = express();
 
 app.use(function (req, res, next) {
-    
+
     // Website you wish to allow to connect
     res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -35,92 +35,114 @@ app.use(function (req, res, next) {
     next();
 });
 
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.post('/login/auth', async (req,res) => {
+app.post('/login/auth', async (req, res) => {
     console.log(req.body);
-    const token = jwt.sign(
-        {
-            username: req.body.username,
-        },
-        'somesupersecret',
-        {expiresIn: '1h'}
-        );
-        
-        const decodedToken = jwt.decode(token);
-        const expiresAt = decodedToken.exp;
-        // console.table(decodedToken);
 
-        const refreshToken = getRefreshToken();
-        const saveRefreshToken = new Token({
-            refreshToken,
-            user: decodedToken.username
-        });
+    //create new token
+    const token = createToken(req.body.username);
 
-        const saveToken = await saveRefreshToken.save();
+    //Get token expiry time by decoding token
+    const decodedToken = jwt.decode(token);
+    const expiresAt = decodedToken.exp;
+    // console.table(decodedToken);
 
-        //set refresh token cookie
-        res.cookie('refreshToken', refreshToken,{
-            httpOnly: true
-        });
-        
-        //setting cookie
-        res.cookie('token',token, {
-            httpOnly: true
-        });
+    // Get a refresh token
+    const refreshToken = getRefreshToken();
 
-        res.json({
-            token,
-            expiresAt,
-            username: decodedToken.username
-        });
+    //Save refresh token & username to mongoDB
+    const saveRefreshToken = new Token({
+        refreshToken,
+        user: decodedToken.username
     });
-    
-    
-    // Add user to database
-    // app.post('/api/adduser', (req,res) => {
-        //     const {username,password} =  req.body;
-        //     bcrypt.hash(password, 12)
-        //     .then(hashedPassword => {
-            //         const myUser = new user({
-                //             username,
-                //             password: hashedPassword
-                //         });
-                
-                //         return myUser.save();
+    await saveRefreshToken.save();
+
+    //set refresh token cookie
+    res.cookie('refreshToken', refreshToken, {
+        httpOnly: true
+    });
+
+    //set jwt cookie
+    res.cookie('token', token, {
+        httpOnly: true
+    });
+
+    res.json({
+        token,
+        expiresAt
+        // username: decodedToken.username
+    });
+});
+
+
+// Add user to database
+// app.post('/api/adduser', (req,res) => {
+//     const {username,password} =  req.body;
+//     bcrypt.hash(password, 12)
+//     .then(hashedPassword => {
+//         const myUser = new user({
+//             username,
+//             password: hashedPassword
+//         });
+
+//         return myUser.save();
 //     })
 //     .then(result => {
-    //             res.status(200).json(result);
-    //      })
-    //     .catch(error => {
-        //         console.log(error)
-        //     });
-        
-        // });
-        
-        
-    app.use(csrfProtection);
-    app.get('/api/csrf-protection',(req,res) => {
-        res.json({ csrfToken: req.csrfToken() });
+//             res.status(200).json(result);
+//      })
+//     .catch(error => {
+//         console.log(error)
+//     });
+
+// });
+
+app.get('/api/token/refresh', async (req, res) => {
+    const {refreshToken} = req.cookies;
+
+    const userFromToken = await Token.findOne({
+        refreshToken
+    }).select('user');
+    // console.log('userFromToken: ' + userFromToken.user);
+    const user = await User.findOne({
+        username: userFromToken.user
     });
-        
-    app.post('/api/adduser', verifyToken, async (req,res) => {
-    const {username,password} = req.body;
+    // console.log('user: ' + user.username);
+    
+    const token = createToken(user);
+    const decodedToken = jwt.decode(token);
+    const expiresAt = decodedToken.exp;
+
+    res.cookie('token', token, {
+        httpOnly: true
+    });
+
+    res.json({token,expiresAt});
+});
+
+
+app.use(csrfProtection);
+app.get('/api/csrf-protection', (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
+});
+
+app.post('/api/adduser', verifyToken, async (req, res) => {
+    const { username, password } = req.body;
     // console.log('Username: ' + username + 'Password: ' + password);
-    try{
-        const hashedPassword = await bcrypt.hash(password,12);
+    try {
+        const hashedPassword = await bcrypt.hash(password, 12);
         const myUser = new User({
             username,
             password: hashedPassword
         });
-        
+
         const result = await myUser.save();
-    
+
         res.status(200).json(result);
     }
-    catch(error){
+    catch (error) {
         console.log(error);
     }
 });
@@ -137,4 +159,4 @@ app.post('/login/auth', async (req,res) => {
 mongoose.connect('mongodb://localhost:27017/testApp');
 
 //start node server
-app.listen(4000,() => console.log('Server running on port 4000'));
+app.listen(4000, () => console.log('Server running on port 4000'));

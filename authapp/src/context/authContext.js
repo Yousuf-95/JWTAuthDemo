@@ -31,12 +31,30 @@ const AuthProvider = ({children}) => {
     };
 
     const logout = () => {
-        localStorage.removeItem('token');
+        // localStorage.removeItem('token');
         localStorage.removeItem('expiresAt');
         setAuthState({
             token: null,
             expiresAt: null
         });
+    }
+
+    const getNewToken = async () => {
+        try{
+            const token = await fetch('/api/token/refresh');
+            const result = await token.json();
+            // console.log(result.token);
+            // console.log(result.expiresAt);
+            // console.log(authState);
+            setAuthState(
+                Object.assign({},{token: result.token},{expiresAt:result.expiresAt})
+            )
+            // console.log(authState);
+            
+        }
+        catch(error){
+            console.log(error);
+        }
     }
 
     return(
@@ -45,7 +63,8 @@ const AuthProvider = ({children}) => {
                 authState,
                 setAuthState: (authInfo) => setAuthInfo(authInfo),
                 isAuthenticated,
-                logout
+                logout,
+                getNewToken
             }}
         >
             {children}
